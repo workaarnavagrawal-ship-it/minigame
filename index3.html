@@ -334,30 +334,8 @@ function MatchCard({ match, prediction, onPredict, onUnpredict, isAdmin, leagueI
   const [away, setAway] = useState(prediction?.away_score ?? 1);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(!!prediction);
-  const [locked, setLocked] = useState(isLocked(match.kickoff));
+  const locked = isLocked(match.kickoff);
   const finished = match.status === 'finished';
-
-  // Auto-lock exactly at kickoff (no polling — single scheduled flip),
-  // and re-check whenever the app regains focus after being backgrounded.
-  useEffect(() => {
-    if (locked || finished) return;
-    const msToKickoff = new Date(match.kickoff).getTime() - Date.now();
-    let timer;
-    if (msToKickoff <= 0) {
-      setLocked(true);
-    } else {
-      // cap setTimeout to avoid overflow on far-future matches (>24 days)
-      timer = setTimeout(() => setLocked(true), Math.min(msToKickoff, 2_000_000_000));
-    }
-    const recheck = () => { if (isLocked(match.kickoff)) setLocked(true); };
-    document.addEventListener('visibilitychange', recheck);
-    window.addEventListener('focus', recheck);
-    return () => {
-      clearTimeout(timer);
-      document.removeEventListener('visibilitychange', recheck);
-      window.removeEventListener('focus', recheck);
-    };
-  }, [match.kickoff, locked, finished]);
 
   async function submit() {
     setSaving(true);
