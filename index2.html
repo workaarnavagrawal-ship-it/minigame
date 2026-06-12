@@ -10,7 +10,7 @@
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -30,7 +30,7 @@
       --radius: 22px;
       --radius-lg: 28px;
       --pill: 999px;
-      --display: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --display: 'Fraunces', Georgia, serif;
       --body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     }
 
@@ -48,11 +48,11 @@
     /* ── Header ── */
     .header { padding: 22px 20px 14px; position: relative; }
     .header-eyebrow { font-family: var(--body); font-size: 11px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; }
-    .header-title { font-family: var(--display); font-size: 34px; line-height: 1.0; font-weight: 800; letter-spacing: -1.2px; }
+    .header-title { font-family: var(--display); font-size: 38px; line-height: 0.95; font-weight: 600; letter-spacing: -1px; font-optical-sizing: auto; }
     .header-row { display: flex; align-items: flex-end; justify-content: space-between; margin-top: 14px; }
     .header-sub { font-size: 13px; color: var(--hint); font-weight: 500; }
     .header-pot { text-align: right; }
-    .pot-amount { font-family: var(--display); font-size: 26px; font-weight: 800; color: var(--gold); line-height: 1; letter-spacing: -0.8px; }
+    .pot-amount { font-family: var(--display); font-size: 26px; font-weight: 700; color: var(--gold); line-height: 1; letter-spacing: -0.5px; }
     .pot-label { font-size: 10px; color: var(--hint); text-transform: uppercase; letter-spacing: 1.5px; margin-top: 3px; }
 
     /* ── Tab Bar ── */
@@ -81,94 +81,60 @@
     .team-flag { font-size: 44px; line-height: 1; margin-bottom: 8px; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5)); }
     .team-name { font-size: 13px; font-weight: 700; letter-spacing: -0.2px; }
     .vs-block { width: 78px; text-align: center; flex-shrink: 0; }
-    .vs-text { font-family: var(--display); font-size: 13px; color: var(--hint); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
-    .score-display { font-family: var(--display); font-size: 28px; font-weight: 800; letter-spacing: -0.5px; color: var(--text); }
+    .vs-text { font-family: var(--display); font-size: 18px; font-style: italic; color: var(--hint); font-weight: 500; }
+    .score-display { font-family: var(--display); font-size: 30px; font-weight: 700; letter-spacing: 1px; color: var(--text); }
 
     /* ── Score Stepper ── */
     .score-inputs { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
     .score-stepper { display: flex; align-items: center; background: var(--panel2); border: 1px solid var(--border); border-radius: var(--pill); overflow: hidden; }
     .stepper-btn { width: 42px; height: 42px; border: none; background: none; color: var(--text); font-size: 22px; font-weight: 400; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.12s; }
     .stepper-btn:active { background: rgba(255,255,255,0.08); }
-    .stepper-val { width: 30px; text-align: center; font-family: var(--display); font-size: 20px; font-weight: 800; }
-    .vs-dash { font-family: var(--display); font-size: 20px; font-weight: 500; color: var(--hint); }
+    .stepper-val { width: 30px; text-align: center; font-family: var(--display); font-size: 22px; font-weight: 700; }
+    .vs-dash { font-family: var(--display); font-size: 22px; font-weight: 400; color: var(--hint); }
 
     /* ── Glossy pill buttons (RevisionDojo style) ── */
     .gloss-btn {
-      position: relative; width: 100%; margin-top: 14px; padding: 17px;
+      position: relative; width: 100%; margin-top: 14px; padding: 16px;
       border: none; border-radius: var(--pill); cursor: pointer;
-      font-family: var(--body); font-size: 16px; font-weight: 700; letter-spacing: -0.1px;
-      color: #ffffff;
-      background: linear-gradient(180deg, #4cc2f7 0%, var(--accent) 50%, var(--accent-deep) 100%);
-      box-shadow:
-        0 6px 0 0 #0676a6,                          /* solid darker base edge (extrude) */
-        0 12px 22px -8px rgba(56,189,248,0.55),       /* ambient glow */
-        inset 0 2px 1px rgba(255,255,255,0.65),       /* top inner highlight */
-        inset 0 -10px 14px -8px rgba(3,70,105,0.45);  /* bottom inner shade */
-      transition: transform 0.1s ease, box-shadow 0.1s ease;
+      font-family: var(--body); font-size: 16px; font-weight: 700; letter-spacing: -0.2px;
+      color: #04293a;
+      background: linear-gradient(180deg, #7dd3fc 0%, var(--accent) 46%, var(--accent-deep) 100%);
+      box-shadow: 0 8px 20px -6px rgba(56,189,248,0.55), inset 0 2px 1px rgba(255,255,255,0.55), inset 0 -3px 6px rgba(2,80,120,0.35);
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
       overflow: hidden;
     }
     .gloss-btn::before {
-      content: ''; position: absolute; top: 3px; left: 6%; right: 6%; height: 42%;
-      border-radius: var(--pill);
-      background: linear-gradient(180deg, rgba(255,255,255,0.5), rgba(255,255,255,0.05) 70%, rgba(255,255,255,0));
+      content: ''; position: absolute; top: 5px; left: 14px; right: 50%; height: 36%;
+      border-radius: var(--pill); background: linear-gradient(180deg, rgba(255,255,255,0.55), rgba(255,255,255,0));
       pointer-events: none;
     }
-    .gloss-btn:active {
-      transform: translateY(4px);
-      box-shadow:
-        0 2px 0 0 #0676a6,
-        0 6px 12px -8px rgba(56,189,248,0.5),
-        inset 0 2px 1px rgba(255,255,255,0.6),
-        inset 0 -8px 12px -8px rgba(3,70,105,0.45);
-    }
+    .gloss-btn:active { transform: translateY(2px); box-shadow: 0 4px 12px -6px rgba(56,189,248,0.5), inset 0 2px 1px rgba(255,255,255,0.5); }
     .gloss-btn:disabled { cursor: default; }
     .gloss-btn.saved {
-      color: #ffffff;
-      background: linear-gradient(180deg, #4ade80 0%, var(--win) 50%, #059669 100%);
-      box-shadow:
-        0 6px 0 0 #047a52,
-        0 12px 22px -8px rgba(52,211,153,0.5),
-        inset 0 2px 1px rgba(255,255,255,0.6),
-        inset 0 -10px 14px -8px rgba(4,80,55,0.45);
-    }
-    .gloss-btn.saved:active {
-      transform: translateY(4px);
-      box-shadow: 0 2px 0 0 #047a52, 0 6px 12px -8px rgba(52,211,153,0.5), inset 0 2px 1px rgba(255,255,255,0.55), inset 0 -8px 12px -8px rgba(4,80,55,0.45);
+      color: #052e22;
+      background: linear-gradient(180deg, #6ee7b7 0%, var(--win) 46%, #059669 100%);
+      box-shadow: 0 8px 20px -6px rgba(52,211,153,0.5), inset 0 2px 1px rgba(255,255,255,0.5), inset 0 -3px 6px rgba(4,90,60,0.35);
     }
     .gloss-btn.locked {
       color: var(--hint);
-      background: linear-gradient(180deg, #1f1f24, #141417);
-      box-shadow: 0 4px 0 0 #0a0a0c, inset 0 1px 1px rgba(255,255,255,0.05), inset 0 -2px 4px rgba(0,0,0,0.4);
+      background: linear-gradient(180deg, #1c1c20, #131316);
+      box-shadow: inset 0 1px 1px rgba(255,255,255,0.06), inset 0 -2px 4px rgba(0,0,0,0.4);
     }
-    .gloss-btn.locked::before { display: none; }
 
-    /* ── Unsave (ghost) button ── */
-    .unsave-btn {
-      width: 100%; margin-top: 10px; padding: 12px;
-      border: 1px solid var(--border-bright); border-radius: var(--pill);
-      background: transparent; color: var(--hint);
-      font-family: var(--body); font-size: 13px; font-weight: 600; cursor: pointer;
-      transition: background 0.12s, color 0.12s;
-    }
-    .unsave-btn:active { background: rgba(255,255,255,0.05); color: var(--text); }
-
-    /* ── Finished result badge ── */
-    .result-badge { display: flex; align-items: center; justify-content: space-between; padding: 11px 14px; margin-top: 14px; background: var(--panel2); border: 1px solid var(--border); border-radius: var(--pill); font-size: 12px; font-weight: 600; color: var(--hint); }
-    .result-pts { font-weight: 800; }
-    .result-pts.win { color: var(--win); }
-    .result-pts.zero { color: var(--hint); }
+    /* ── My prediction badge ── */
+    .my-prediction-badge { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 9px; background: rgba(56,189,248,0.10); border: 1px solid rgba(56,189,248,0.2); border-radius: var(--pill); font-size: 12px; font-weight: 600; color: var(--accent); margin-top: 10px; }
 
     /* ── Leaderboard ── */
     .lb-row { display: flex; align-items: center; padding: 14px 18px; gap: 13px; border-bottom: 1px solid var(--border); }
     .lb-row:last-child { border-bottom: none; }
-    .lb-rank { width: 28px; text-align: center; font-family: var(--display); font-size: 15px; font-weight: 800; color: var(--hint); }
+    .lb-rank { width: 28px; text-align: center; font-family: var(--display); font-size: 16px; font-weight: 700; color: var(--hint); }
     .lb-rank.gold { color: var(--gold); font-size: 20px; }
     .lb-rank.silver { color: #d4d4d8; font-size: 20px; }
     .lb-rank.bronze { color: #d4915a; font-size: 20px; }
     .lb-avatar { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 17px; font-weight: 700; flex-shrink: 0; color: #fff; box-shadow: inset 0 2px 2px rgba(255,255,255,0.25), inset 0 -3px 5px rgba(0,0,0,0.25); }
     .lb-name { font-size: 15px; font-weight: 700; letter-spacing: -0.2px; }
     .lb-meta { font-size: 12px; color: var(--hint); margin-top: 1px; }
-    .lb-points { text-align: right; font-family: var(--display); font-size: 22px; font-weight: 800; color: var(--text); line-height: 1; }
+    .lb-points { text-align: right; font-family: var(--display); font-size: 24px; font-weight: 700; color: var(--text); line-height: 1; }
     .lb-pts-label { font-size: 9px; color: var(--hint); text-transform: uppercase; letter-spacing: 1.5px; text-align: right; margin-top: 2px; }
     .paid-badge { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; background: rgba(52,211,153,0.14); color: var(--win); border-radius: var(--pill); padding: 3px 8px; }
     .unpaid-badge { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; background: rgba(251,113,133,0.14); color: var(--danger); border-radius: var(--pill); padding: 3px 8px; }
@@ -177,12 +143,12 @@
     .stat-duo { display: flex; gap: 14px; margin: 0 16px 14px; }
     .stat-box { flex: 1; background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; }
     .stat-label { font-size: 10px; color: var(--hint); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px; }
-    .stat-value { font-family: var(--display); font-size: 30px; font-weight: 800; line-height: 1; letter-spacing: -1.2px; }
+    .stat-value { font-family: var(--display); font-size: 32px; font-weight: 700; line-height: 1; letter-spacing: -1px; }
 
     /* ── Invite ── */
     .invite-box { position: relative; background: linear-gradient(160deg, rgba(56,189,248,0.12), rgba(56,189,248,0.03)); border: 1px solid rgba(56,189,248,0.22); border-radius: var(--radius); padding: 18px; margin: 0 16px 14px; text-align: center; cursor: pointer; overflow: hidden; }
     .invite-label { font-size: 10px; color: var(--accent); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; font-weight: 700; }
-    .invite-code { font-family: var(--display); font-size: 28px; font-weight: 800; letter-spacing: 6px; color: #fff; }
+    .invite-code { font-family: var(--display); font-size: 30px; font-weight: 700; letter-spacing: 6px; color: #fff; }
     .invite-hint { font-size: 11px; color: var(--hint); margin-top: 8px; }
 
     /* ── Admin entry ── */
@@ -192,7 +158,7 @@
     /* ── Rules ── */
     .rule-row { display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--border); font-size: 14px; font-weight: 500; }
     .rule-row:last-child { border-bottom: none; }
-    .rule-pts { font-family: var(--display); font-weight: 800; font-size: 16px; }
+    .rule-pts { font-family: var(--display); font-weight: 700; font-size: 17px; }
 
     /* ── Buttons (small/utility) ── */
     .btn { padding: 9px 14px; border-radius: var(--pill); border: none; font-family: var(--body); font-size: 12px; font-weight: 700; cursor: pointer; transition: opacity 0.15s, transform 0.1s; }
@@ -329,7 +295,7 @@ function ScoreStepper({ value, onChange, disabled }) {
 }
 
 // ── Match Card ────────────────────────────────────────
-function MatchCard({ match, prediction, onPredict, onUnpredict, isAdmin, leagueId, onAdminScore }) {
+function MatchCard({ match, prediction, onPredict, isAdmin, leagueId, onAdminScore }) {
   const [home, setHome] = useState(prediction?.home_score ?? 1);
   const [away, setAway] = useState(prediction?.away_score ?? 1);
   const [saving, setSaving] = useState(false);
@@ -343,18 +309,6 @@ function MatchCard({ match, prediction, onPredict, onUnpredict, isAdmin, leagueI
       await onPredict(match.id, home, away);
       setSaved(true);
       tg?.HapticFeedback?.notificationOccurred('success');
-    } catch(e) {
-      tg?.HapticFeedback?.notificationOccurred('error');
-    }
-    setSaving(false);
-  }
-
-  async function unsave() {
-    setSaving(true);
-    try {
-      await onUnpredict(match.id);
-      setSaved(false);
-      tg?.HapticFeedback?.impactOccurred('light');
     } catch(e) {
       tg?.HapticFeedback?.notificationOccurred('error');
     }
@@ -397,28 +351,21 @@ function MatchCard({ match, prediction, onPredict, onUnpredict, isAdmin, leagueI
 
             {locked
               ? <button className="gloss-btn locked" disabled>Locked at kickoff</button>
-              : <>
-                  <button
-                    className={`gloss-btn ${saved ? 'saved' : ''}`}
-                    onClick={submit}
-                    disabled={saving}
-                  >
-                    {saving ? 'Saving…' : saved ? 'Saved' : 'Save prediction'}
-                  </button>
-                  {saved && (
-                    <button className="unsave-btn" onClick={unsave}>Unsave</button>
-                  )}
-                </>
+              : <button
+                  className={`gloss-btn ${saved ? 'saved' : ''}`}
+                  onClick={submit}
+                  disabled={saving}
+                >
+                  {saving ? 'Saving…' : saved ? `Saved · ${home}–${away}` : 'Save prediction'}
+                </button>
             }
           </>
         )}
 
-        {finished && prediction && (
-          <div className="result-badge">
-            <span>Your pick {prediction.home_score}–{prediction.away_score}</span>
-            <span className={`result-pts ${prediction.points_earned > 0 ? 'win' : 'zero'}`}>
-              +{prediction.points_earned ?? 0} pts
-            </span>
+        {prediction && (
+          <div className="my-prediction-badge">
+            Your pick: {prediction.home_score}–{prediction.away_score}
+            {prediction.points_earned > 0 && <span style={{color:'var(--gold)'}}> · +{prediction.points_earned} pts</span>}
           </div>
         )}
 
@@ -465,7 +412,7 @@ function AdminScoreEntry({ match, leagueId, onScore }) {
 }
 
 // ── Predictions Tab ───────────────────────────────────
-function PredictionsTab({ data, onPredict, onUnpredict, onAdminScore }) {
+function PredictionsTab({ data, onPredict, onAdminScore }) {
   if (!data) return <div className="loading"><div className="spinner"/></div>;
 
   const upcoming = data.matches.filter(m => m.status !== 'finished' && !isLocked(m.kickoff));
@@ -481,7 +428,6 @@ function PredictionsTab({ data, onPredict, onUnpredict, onAdminScore }) {
           match={m}
           prediction={data.myPredictions[m.id]}
           onPredict={onPredict}
-          onUnpredict={onUnpredict}
           isAdmin={data.isAdmin}
           leagueId={data.league.id}
           onAdminScore={onAdminScore}
@@ -650,20 +596,7 @@ function App() {
       ...d,
       myPredictions: { ...d.myPredictions, [matchId]: { home_score: home, away_score: away } }
     }));
-    showToast('Prediction saved');
-  }
-
-  async function handleUnpredict(matchId) {
-    await api('/api/unpredict', {
-      method: 'POST',
-      body: { league_id: leagueId, match_id: matchId }
-    });
-    setData(d => {
-      const mp = { ...d.myPredictions };
-      delete mp[matchId];
-      return { ...d, myPredictions: mp };
-    });
-    showToast('Prediction removed');
+    showToast('✅ Prediction saved!');
   }
 
   async function handleMarkPaid(memberId) {
@@ -671,7 +604,7 @@ function App() {
       method: 'POST',
       body: { league_id: leagueId, member_telegram_id: memberId }
     });
-    showToast('Marked as paid');
+    showToast('✅ Marked as paid');
     loadData();
   }
 
@@ -679,7 +612,7 @@ function App() {
     return (
       <div style={{padding: '80px 28px', textAlign: 'center'}}>
         <div className="header-eyebrow" style={{textAlign:'center'}}>Offside · WC 2026</div>
-        <div style={{fontFamily:'var(--display)', fontSize: 38, fontWeight: 800, letterSpacing:'-1.2px', margin:'8px 0 14px'}}>Predictor</div>
+        <div style={{fontFamily:'var(--display)', fontSize: 40, fontWeight: 600, letterSpacing:'-1px', margin:'8px 0 14px'}}>Predictor</div>
         <div style={{fontSize: 14, color: 'var(--hint)', lineHeight:1.5}}>Open this app from your Telegram bot to view your league.</div>
       </div>
     );
@@ -698,7 +631,7 @@ function App() {
         <div className="header-title">{data?.league.name || 'League'}</div>
         <div className="header-row">
           <div className="header-sub">{data?.members.length} {data?.members.length === 1 ? 'player' : 'players'}</div>
-          {data && tab === 'predict' && (
+          {data && (
             <div className="header-pot">
               <div className="pot-amount">₹{data.league.pot.toLocaleString('en-IN')}</div>
               <div className="pot-label">Total pot</div>
@@ -709,7 +642,7 @@ function App() {
 
       {/* Tab Content */}
       {tab === 'predict' && (
-        <PredictionsTab data={data} onPredict={handlePredict} onUnpredict={handleUnpredict} onAdminScore={loadData} />
+        <PredictionsTab data={data} onPredict={handlePredict} onAdminScore={loadData} />
       )}
       {tab === 'leaderboard' && (
         <LeaderboardTab data={data} onMarkPaid={handleMarkPaid} />
