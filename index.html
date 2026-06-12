@@ -137,7 +137,7 @@
 const { useState, useEffect, useCallback, useRef } = React;
 
 // ── Config ──────────────────────────────────────────
-const API_BASE = 'offside-production.up.railway.app'; // e.g. https://wc-predictor.railway.app
+const API_BASE = 'https://offside-production.up.railway.app';
 
 // ── Helpers ──────────────────────────────────────────
 const tg = window.Telegram?.WebApp;
@@ -146,12 +146,29 @@ function getInitData() {
   return tg?.initData || '';
 }
 
+function getTelegramUserId() {
+  try {
+    const user = tg?.initDataUnsafe?.user;
+    if (user?.id) return user.id;
+    // fallback: parse from initData string
+    const params = new URLSearchParams(tg?.initData || '');
+    const userStr = params.get('user');
+    if (userStr) return JSON.parse(userStr).id;
+  } catch(e) {}
+  return null;
+}
+
 async function api(path, opts = {}) {
+  const initData = getInitData();
+  const userId = getTelegramUserId();
+  console.log('API call:', path, 'initData length:', initData.length, 'userId:', userId);
+  
   const res = await fetch(API_BASE + path, {
     ...opts,
     headers: {
       'Content-Type': 'application/json',
-      'x-telegram-init-data': getInitData(),
+      'x-telegram-init-data': initData,
+      'x-telegram-user-id': userId ? String(userId) : '',
       ...(opts.headers || {})
     },
     body: opts.body ? JSON.stringify(opts.body) : undefined
