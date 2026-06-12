@@ -8,130 +8,209 @@
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: var(--tg-theme-bg-color, #0f0f0f);
-      --bg2: var(--tg-theme-secondary-bg-color, #1a1a2e);
-      --text: var(--tg-theme-text-color, #ffffff);
-      --hint: var(--tg-theme-hint-color, #8a8a9a);
-      --accent: #00c851;
-      --accent2: #2979ff;
-      --gold: #ffc107;
-      --danger: #ff4444;
-      --card: rgba(255,255,255,0.06);
-      --border: rgba(255,255,255,0.10);
-      --radius: 14px;
+      --bg: #000000;
+      --panel: #0c0c0e;
+      --panel2: #141417;
+      --text: #ffffff;
+      --hint: #8b8b95;
+      --accent: #38bdf8;        /* sky — the RevisionDojo button blue */
+      --accent-deep: #0ea5e9;
+      --win: #34d399;
+      --gold: #fbbf24;
+      --danger: #fb7185;
+      --border: rgba(255,255,255,0.08);
+      --border-bright: rgba(255,255,255,0.14);
+      --radius: 22px;
+      --radius-lg: 28px;
+      --pill: 999px;
+      --display: 'Fraunces', Georgia, serif;
+      --body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     }
 
-    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif; -webkit-font-smoothing: antialiased; }
+    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--body); -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
 
-    #root { min-height: 100vh; display: flex; flex-direction: column; }
+    /* ── Ambient blurred flags backdrop ── */
+    .flag-field { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; filter: blur(48px) saturate(1.3); opacity: 0.40; }
+    .flag-blob { position: absolute; width: 46vw; height: 46vw; border-radius: 50%; mix-blend-mode: screen; }
+    .flag-field::after { content: ''; position: absolute; inset: 0; background: radial-gradient(120% 80% at 50% 0%, transparent 30%, #000 88%); }
 
-    .screen { flex: 1; display: flex; flex-direction: column; padding: 0 0 80px; }
+    #root { position: relative; z-index: 1; min-height: 100vh; display: flex; flex-direction: column; }
 
-    /* Header */
-    .header { padding: 16px 16px 12px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); }
-    .header-logo { font-size: 22px; }
-    .header-title { font-size: 17px; font-weight: 700; letter-spacing: -0.3px; }
-    .header-sub { font-size: 12px; color: var(--hint); margin-top: 1px; }
-    .header-pot { margin-left: auto; text-align: right; }
-    .pot-amount { font-size: 18px; font-weight: 800; color: var(--gold); }
-    .pot-label { font-size: 11px; color: var(--hint); }
+    .screen { flex: 1; display: flex; flex-direction: column; padding: 0 0 96px; }
 
-    /* Tab Bar */
-    .tabbar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg); border-top: 1px solid var(--border); display: flex; padding: 8px 0 max(8px, env(safe-area-inset-bottom)); z-index: 100; }
-    .tab { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 4px 0; cursor: pointer; opacity: 0.45; transition: opacity 0.15s; border: none; background: none; color: var(--text); font-size: 10px; font-weight: 500; letter-spacing: 0.2px; }
-    .tab.active { opacity: 1; color: var(--accent); }
-    .tab-icon { font-size: 22px; line-height: 1; }
+    /* ── Header ── */
+    .header { padding: 22px 20px 14px; position: relative; }
+    .header-eyebrow { font-family: var(--body); font-size: 11px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; }
+    .header-title { font-family: var(--display); font-size: 38px; line-height: 0.95; font-weight: 600; letter-spacing: -1px; font-optical-sizing: auto; }
+    .header-row { display: flex; align-items: flex-end; justify-content: space-between; margin-top: 14px; }
+    .header-sub { font-size: 13px; color: var(--hint); font-weight: 500; }
+    .header-pot { text-align: right; }
+    .pot-amount { font-family: var(--display); font-size: 26px; font-weight: 700; color: var(--gold); line-height: 1; letter-spacing: -0.5px; }
+    .pot-label { font-size: 10px; color: var(--hint); text-transform: uppercase; letter-spacing: 1.5px; margin-top: 3px; }
 
-    /* Cards */
-    .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; margin: 0 12px 10px; }
-    .card-sm { padding: 10px 14px; }
+    /* ── Tab Bar ── */
+    .tabbar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(8,8,10,0.82); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-top: 1px solid var(--border); display: flex; padding: 10px 0 max(12px, env(safe-area-inset-bottom)); z-index: 100; }
+    .tab { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 4px 0; cursor: pointer; border: none; background: none; color: var(--hint); font-size: 10px; font-weight: 600; letter-spacing: 0.4px; text-transform: uppercase; transition: color 0.18s; }
+    .tab.active { color: var(--accent); }
+    .tab-icon { font-size: 20px; line-height: 1; }
 
-    /* Match Card */
-    .match-card { margin: 0 12px 10px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
-    .match-header { padding: 8px 14px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
-    .match-stage { font-size: 10px; font-weight: 600; color: var(--hint); text-transform: uppercase; letter-spacing: 0.8px; }
-    .match-time { font-size: 11px; color: var(--hint); }
-    .match-time.live { color: #ff4757; font-weight: 700; }
-    .match-body { padding: 14px; }
+    /* ── Cards ── */
+    .card { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin: 0 16px 14px; }
+
+    /* ── Section label / eyebrow ── */
+    .section-label { font-family: var(--body); font-size: 11px; font-weight: 700; color: var(--hint); text-transform: uppercase; letter-spacing: 2px; padding: 20px 20px 10px; display: flex; align-items: center; gap: 8px; }
+    .section-label::before { content: ''; width: 18px; height: 1px; background: var(--accent); display: inline-block; }
+
+    /* ── Match Card ── */
+    .match-card { position: relative; margin: 0 16px 14px; background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+    .match-card.is-finished { opacity: 0.92; }
+    .match-header { padding: 13px 18px 11px; display: flex; align-items: center; justify-content: space-between; }
+    .match-stage { font-size: 10px; font-weight: 700; color: var(--hint); text-transform: uppercase; letter-spacing: 1.5px; }
+    .match-time { font-size: 11px; color: var(--hint); font-weight: 600; }
+    .match-time.live { color: var(--danger); font-weight: 700; }
+    .match-body { padding: 6px 18px 18px; }
     .teams-row { display: flex; align-items: center; gap: 0; }
     .team { flex: 1; text-align: center; }
-    .team-flag { font-size: 30px; line-height: 1; margin-bottom: 4px; }
-    .team-name { font-size: 13px; font-weight: 600; }
-    .vs-block { width: 80px; text-align: center; flex-shrink: 0; }
-    .vs-text { font-size: 11px; color: var(--hint); font-weight: 600; }
-    .score-display { font-size: 22px; font-weight: 800; letter-spacing: 2px; color: var(--accent); }
+    .team-flag { font-size: 44px; line-height: 1; margin-bottom: 8px; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5)); }
+    .team-name { font-size: 13px; font-weight: 700; letter-spacing: -0.2px; }
+    .vs-block { width: 78px; text-align: center; flex-shrink: 0; }
+    .vs-text { font-family: var(--display); font-size: 18px; font-style: italic; color: var(--hint); font-weight: 500; }
+    .score-display { font-family: var(--display); font-size: 30px; font-weight: 700; letter-spacing: 1px; color: var(--text); }
 
-    /* Score Input */
-    .score-inputs { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
-    .score-input-group { display: flex; align-items: center; gap: 6px; }
-    .score-label { font-size: 11px; color: var(--hint); font-weight: 500; }
-    .score-stepper { display: flex; align-items: center; gap: 0; background: rgba(255,255,255,0.08); border-radius: 10px; overflow: hidden; }
-    .stepper-btn { width: 36px; height: 36px; border: none; background: none; color: var(--text); font-size: 20px; font-weight: 300; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.1s; }
-    .stepper-btn:active { background: rgba(255,255,255,0.1); }
-    .stepper-val { width: 32px; text-align: center; font-size: 18px; font-weight: 700; }
-    .vs-dash { font-size: 20px; font-weight: 300; color: var(--hint); }
-    .predict-btn { width: 100%; margin-top: 10px; padding: 11px; background: var(--accent); border: none; border-radius: 10px; color: #000; font-size: 14px; font-weight: 700; cursor: pointer; transition: opacity 0.15s; }
-    .predict-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-    .predict-btn.saved { background: rgba(0,200,81,0.15); color: var(--accent); border: 1px solid rgba(0,200,81,0.3); }
-    .predict-btn.locked { background: rgba(255,255,255,0.06); color: var(--hint); }
+    /* ── Score Stepper ── */
+    .score-inputs { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+    .score-stepper { display: flex; align-items: center; background: var(--panel2); border: 1px solid var(--border); border-radius: var(--pill); overflow: hidden; }
+    .stepper-btn { width: 42px; height: 42px; border: none; background: none; color: var(--text); font-size: 22px; font-weight: 400; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.12s; }
+    .stepper-btn:active { background: rgba(255,255,255,0.08); }
+    .stepper-val { width: 30px; text-align: center; font-family: var(--display); font-size: 22px; font-weight: 700; }
+    .vs-dash { font-family: var(--display); font-size: 22px; font-weight: 400; color: var(--hint); }
 
-    /* Leaderboard */
-    .lb-row { display: flex; align-items: center; padding: 12px 16px; gap: 12px; border-bottom: 1px solid var(--border); }
+    /* ── Glossy pill buttons (RevisionDojo style) ── */
+    .gloss-btn {
+      position: relative; width: 100%; margin-top: 14px; padding: 16px;
+      border: none; border-radius: var(--pill); cursor: pointer;
+      font-family: var(--body); font-size: 16px; font-weight: 700; letter-spacing: -0.2px;
+      color: #04293a;
+      background: linear-gradient(180deg, #7dd3fc 0%, var(--accent) 46%, var(--accent-deep) 100%);
+      box-shadow: 0 8px 20px -6px rgba(56,189,248,0.55), inset 0 2px 1px rgba(255,255,255,0.55), inset 0 -3px 6px rgba(2,80,120,0.35);
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+      overflow: hidden;
+    }
+    .gloss-btn::before {
+      content: ''; position: absolute; top: 5px; left: 14px; right: 50%; height: 36%;
+      border-radius: var(--pill); background: linear-gradient(180deg, rgba(255,255,255,0.55), rgba(255,255,255,0));
+      pointer-events: none;
+    }
+    .gloss-btn:active { transform: translateY(2px); box-shadow: 0 4px 12px -6px rgba(56,189,248,0.5), inset 0 2px 1px rgba(255,255,255,0.5); }
+    .gloss-btn:disabled { cursor: default; }
+    .gloss-btn.saved {
+      color: #052e22;
+      background: linear-gradient(180deg, #6ee7b7 0%, var(--win) 46%, #059669 100%);
+      box-shadow: 0 8px 20px -6px rgba(52,211,153,0.5), inset 0 2px 1px rgba(255,255,255,0.5), inset 0 -3px 6px rgba(4,90,60,0.35);
+    }
+    .gloss-btn.locked {
+      color: var(--hint);
+      background: linear-gradient(180deg, #1c1c20, #131316);
+      box-shadow: inset 0 1px 1px rgba(255,255,255,0.06), inset 0 -2px 4px rgba(0,0,0,0.4);
+    }
+
+    /* ── My prediction badge ── */
+    .my-prediction-badge { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 9px; background: rgba(56,189,248,0.10); border: 1px solid rgba(56,189,248,0.2); border-radius: var(--pill); font-size: 12px; font-weight: 600; color: var(--accent); margin-top: 10px; }
+
+    /* ── Leaderboard ── */
+    .lb-row { display: flex; align-items: center; padding: 14px 18px; gap: 13px; border-bottom: 1px solid var(--border); }
     .lb-row:last-child { border-bottom: none; }
-    .lb-rank { width: 26px; text-align: center; font-size: 13px; font-weight: 700; color: var(--hint); }
-    .lb-rank.gold { color: #ffd700; font-size: 16px; }
-    .lb-rank.silver { color: #c0c0c0; font-size: 16px; }
-    .lb-rank.bronze { color: #cd7f32; font-size: 16px; }
-    .lb-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--accent2); display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; flex-shrink: 0; }
-    .lb-name { flex: 1; font-size: 14px; font-weight: 600; }
-    .lb-meta { font-size: 11px; color: var(--hint); margin-top: 1px; }
-    .lb-points { text-align: right; font-size: 18px; font-weight: 800; color: var(--accent); }
-    .lb-pts-label { font-size: 10px; color: var(--hint); }
-    .unpaid-badge { font-size: 10px; background: rgba(255,68,68,0.15); color: var(--danger); border-radius: 6px; padding: 2px 6px; margin-left: 6px; }
-    .paid-badge { font-size: 10px; background: rgba(0,200,81,0.15); color: var(--accent); border-radius: 6px; padding: 2px 6px; }
+    .lb-rank { width: 28px; text-align: center; font-family: var(--display); font-size: 16px; font-weight: 700; color: var(--hint); }
+    .lb-rank.gold { color: var(--gold); font-size: 20px; }
+    .lb-rank.silver { color: #d4d4d8; font-size: 20px; }
+    .lb-rank.bronze { color: #d4915a; font-size: 20px; }
+    .lb-avatar { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 17px; font-weight: 700; flex-shrink: 0; color: #fff; box-shadow: inset 0 2px 2px rgba(255,255,255,0.25), inset 0 -3px 5px rgba(0,0,0,0.25); }
+    .lb-name { font-size: 15px; font-weight: 700; letter-spacing: -0.2px; }
+    .lb-meta { font-size: 12px; color: var(--hint); margin-top: 1px; }
+    .lb-points { text-align: right; font-family: var(--display); font-size: 24px; font-weight: 700; color: var(--text); line-height: 1; }
+    .lb-pts-label { font-size: 9px; color: var(--hint); text-transform: uppercase; letter-spacing: 1.5px; text-align: right; margin-top: 2px; }
+    .paid-badge { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; background: rgba(52,211,153,0.14); color: var(--win); border-radius: var(--pill); padding: 3px 8px; }
+    .unpaid-badge { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; background: rgba(251,113,133,0.14); color: var(--danger); border-radius: var(--pill); padding: 3px 8px; }
 
-    /* Admin section */
-    .admin-card { border-color: rgba(255,193,7,0.3); background: rgba(255,193,7,0.05); }
-    .admin-title { font-size: 12px; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; }
+    /* ── Stat duo (pot / players) ── */
+    .stat-duo { display: flex; gap: 14px; margin: 0 16px 14px; }
+    .stat-box { flex: 1; background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; }
+    .stat-label { font-size: 10px; color: var(--hint); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px; }
+    .stat-value { font-family: var(--display); font-size: 32px; font-weight: 700; line-height: 1; letter-spacing: -1px; }
 
-    /* Misc */
-    .section-label { font-size: 12px; font-weight: 700; color: var(--hint); text-transform: uppercase; letter-spacing: 0.8px; padding: 16px 16px 8px; }
-    .pill { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
-    .pill-green { background: rgba(0,200,81,0.15); color: var(--accent); }
-    .pill-blue { background: rgba(41,121,255,0.15); color: var(--accent2); }
-    .pill-red { background: rgba(255,68,68,0.15); color: var(--danger); }
-    .empty { text-align: center; padding: 48px 24px; color: var(--hint); font-size: 15px; }
-    .empty-icon { font-size: 48px; margin-bottom: 12px; }
+    /* ── Invite ── */
+    .invite-box { position: relative; background: linear-gradient(160deg, rgba(56,189,248,0.12), rgba(56,189,248,0.03)); border: 1px solid rgba(56,189,248,0.22); border-radius: var(--radius); padding: 18px; margin: 0 16px 14px; text-align: center; cursor: pointer; overflow: hidden; }
+    .invite-label { font-size: 10px; color: var(--accent); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; font-weight: 700; }
+    .invite-code { font-family: var(--display); font-size: 30px; font-weight: 700; letter-spacing: 6px; color: #fff; }
+    .invite-hint { font-size: 11px; color: var(--hint); margin-top: 8px; }
 
-    .toast { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); background: #1a1a2e; border: 1px solid var(--accent); color: var(--accent); padding: 10px 20px; border-radius: 24px; font-size: 13px; font-weight: 600; z-index: 999; opacity: 0; transition: opacity 0.2s; pointer-events: none; white-space: nowrap; }
-    .toast.show { opacity: 1; }
+    /* ── Admin entry ── */
+    .admin-entry { margin-top: 12px; padding: 14px; background: rgba(251,191,36,0.06); border: 1px solid rgba(251,191,36,0.2); border-radius: var(--radius); }
+    .admin-title { font-size: 10px; color: var(--gold); font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px; }
 
-    .loading { display: flex; align-items: center; justify-content: center; height: 200px; color: var(--hint); font-size: 14px; gap: 8px; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .spinner { width: 18px; height: 18px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+    /* ── Rules ── */
+    .rule-row { display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--border); font-size: 14px; font-weight: 500; }
+    .rule-row:last-child { border-bottom: none; }
+    .rule-pts { font-family: var(--display); font-weight: 700; font-size: 17px; }
 
-    .btn { padding: 10px 16px; border-radius: 10px; border: none; font-size: 13px; font-weight: 600; cursor: pointer; transition: opacity 0.15s; }
-    .btn:active { opacity: 0.7; }
-    .btn-primary { background: var(--accent); color: #000; }
-    .btn-secondary { background: rgba(255,255,255,0.1); color: var(--text); }
-    .btn-sm { padding: 7px 12px; font-size: 12px; border-radius: 8px; }
+    /* ── Buttons (small/utility) ── */
+    .btn { padding: 9px 14px; border-radius: var(--pill); border: none; font-family: var(--body); font-size: 12px; font-weight: 700; cursor: pointer; transition: opacity 0.15s, transform 0.1s; }
+    .btn:active { transform: scale(0.96); }
+    .btn-mark { background: rgba(52,211,153,0.16); color: var(--win); border: 1px solid rgba(52,211,153,0.3); }
+    .btn-primary { color: #04293a; background: linear-gradient(180deg, #7dd3fc, var(--accent-deep)); box-shadow: inset 0 1px 1px rgba(255,255,255,0.4); }
 
-    input[type=number] { background: rgba(255,255,255,0.08); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 15px; padding: 8px 10px; width: 70px; text-align: center; }
+    input[type=number] { background: var(--panel2); border: 1px solid var(--border); border-radius: 12px; color: var(--text); font-size: 16px; font-weight: 700; padding: 9px; width: 56px; text-align: center; font-family: var(--display); }
     input[type=number]:focus { outline: none; border-color: var(--accent); }
 
-    .my-prediction-badge { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 6px; background: rgba(0,200,81,0.08); border-radius: 8px; font-size: 12px; color: var(--accent); margin-top: 8px; }
-
-    .invite-box { background: rgba(41,121,255,0.1); border: 1px dashed rgba(41,121,255,0.3); border-radius: 10px; padding: 12px; margin: 0 12px 10px; text-align: center; cursor: pointer; }
-    .invite-code { font-size: 24px; font-weight: 800; letter-spacing: 4px; color: var(--accent2); }
-    .invite-hint { font-size: 11px; color: var(--hint); margin-top: 4px; }
+    /* ── Misc ── */
+    .empty { text-align: center; padding: 56px 24px; color: var(--hint); font-size: 15px; }
+    .empty-icon { font-size: 44px; margin-bottom: 14px; opacity: 0.7; }
+    .toast { position: fixed; top: 18px; left: 50%; transform: translateX(-50%); background: rgba(20,20,23,0.95); backdrop-filter: blur(12px); border: 1px solid var(--accent); color: var(--accent); padding: 11px 22px; border-radius: var(--pill); font-size: 13px; font-weight: 700; z-index: 999; opacity: 0; transition: opacity 0.2s; pointer-events: none; white-space: nowrap; }
+    .toast.show { opacity: 1; }
+    .loading { display: flex; align-items: center; justify-content: center; height: 240px; color: var(--hint); font-size: 14px; gap: 10px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner { width: 18px; height: 18px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
   </style>
 </head>
 <body>
+<div class="flag-field" id="flagField"></div>
 <div id="root"></div>
+
+<script>
+// ── Ambient blurred flag blobs (WC nation palettes) ──
+(function paintFlags() {
+  var field = document.getElementById('flagField');
+  if (!field) return;
+  var palettes = [
+    ['#009639','#FFCD00'], ['#0055A4','#EF4135'], ['#75AADB','#FFFFFF'],
+    ['#C8102E','#FFFFFF'], ['#DD0000','#FFCE00'], ['#BC002D','#FFFFFF'],
+    ['#AA151B','#F1BF00'], ['#21468B','#FFFFFF'], ['#006847','#CE1126'],
+    ['#EF3340','#FFFFFF']
+  ];
+  var pos = [[-10,-8],[55,-12],[22,16],[66,28],[-12,44],[42,54],[70,66],[6,76],[46,88],[-6,98]];
+  for (var i = 0; i < palettes.length; i++) {
+    var b = document.createElement('div');
+    b.className = 'flag-blob';
+    b.style.left = pos[i][0] + 'vw';
+    b.style.top = pos[i][1] + 'vh';
+    var cols = palettes[i];
+    var stops = cols.map(function(c, idx){ return c + ' ' + (idx*(100/cols.length)) + '%'; }).join(',');
+    b.style.background = 'linear-gradient(' + (30 + i*28) + 'deg, ' + stops + ')';
+    var size = (38 + (i % 3) * 12);
+    b.style.width = size + 'vw';
+    b.style.height = size + 'vw';
+    field.appendChild(b);
+  }
+})();
+</script>
 
 <script type="text/babel">
 const { useState, useEffect, useCallback, useRef } = React;
@@ -237,11 +316,11 @@ function MatchCard({ match, prediction, onPredict, isAdmin, leagueId, onAdminSco
   }
 
   return (
-    <div className="match-card">
+    <div className={`match-card ${finished ? 'is-finished' : ''}`}>
       <div className="match-header">
-        <span className="match-stage">{match.stage.toUpperCase()}</span>
+        <span className="match-stage">{match.stage}</span>
         <span className={`match-time ${match.status === 'live' ? 'live' : ''}`}>
-          {finished ? '✅ Final' : match.status === 'live' ? '🔴 LIVE' : formatKickoff(match.kickoff)}
+          {finished ? 'Full time' : match.status === 'live' ? '● LIVE' : formatKickoff(match.kickoff)}
         </span>
       </div>
       <div className="match-body">
@@ -253,7 +332,7 @@ function MatchCard({ match, prediction, onPredict, isAdmin, leagueId, onAdminSco
           <div className="vs-block">
             {finished
               ? <div className="score-display">{match.home_score}–{match.away_score}</div>
-              : <div className="vs-text">vs</div>
+              : <div className="vs-text">v</div>
             }
           </div>
           <div className="team">
@@ -265,23 +344,19 @@ function MatchCard({ match, prediction, onPredict, isAdmin, leagueId, onAdminSco
         {!finished && (
           <>
             <div className="score-inputs">
-              <div className="score-input-group">
-                <ScoreStepper value={home} onChange={v => { setHome(v); setSaved(false); }} disabled={locked} />
-              </div>
+              <ScoreStepper value={home} onChange={v => { setHome(v); setSaved(false); }} disabled={locked} />
               <span className="vs-dash">–</span>
-              <div className="score-input-group">
-                <ScoreStepper value={away} onChange={v => { setAway(v); setSaved(false); }} disabled={locked} />
-              </div>
+              <ScoreStepper value={away} onChange={v => { setAway(v); setSaved(false); }} disabled={locked} />
             </div>
 
             {locked
-              ? <button className="predict-btn locked" disabled>🔒 Locked</button>
+              ? <button className="gloss-btn locked" disabled>Locked at kickoff</button>
               : <button
-                  className={`predict-btn ${saved ? 'saved' : ''}`}
+                  className={`gloss-btn ${saved ? 'saved' : ''}`}
                   onClick={submit}
                   disabled={saving}
                 >
-                  {saving ? '...' : saved ? `✅ Saved: ${home}–${away}` : 'Save Prediction'}
+                  {saving ? 'Saving…' : saved ? `Saved · ${home}–${away}` : 'Save prediction'}
                 </button>
             }
           </>
@@ -289,8 +364,8 @@ function MatchCard({ match, prediction, onPredict, isAdmin, leagueId, onAdminSco
 
         {prediction && (
           <div className="my-prediction-badge">
-            🎯 Your pick: {prediction.home_score}–{prediction.away_score}
-            {prediction.points_earned > 0 && <span style={{color:'#ffc107'}}> · +{prediction.points_earned} pts</span>}
+            Your pick: {prediction.home_score}–{prediction.away_score}
+            {prediction.points_earned > 0 && <span style={{color:'var(--gold)'}}> · +{prediction.points_earned} pts</span>}
           </div>
         )}
 
@@ -322,14 +397,14 @@ function AdminScoreEntry({ match, leagueId, onScore }) {
   }
 
   return (
-    <div style={{marginTop:10, padding:10, background:'rgba(255,193,7,0.08)', borderRadius:10, border:'1px solid rgba(255,193,7,0.2)'}}>
-      <div style={{fontSize:11, color:'#ffc107', fontWeight:700, marginBottom:8}}>⚡ ADMIN: Enter Result</div>
-      <div style={{display:'flex', alignItems:'center', gap:8}}>
-        <input type="number" min="0" max="20" value={h} onChange={e=>setH(+e.target.value)} style={{width:52}} />
-        <span style={{color:'var(--hint)'}}>–</span>
-        <input type="number" min="0" max="20" value={a} onChange={e=>setA(+e.target.value)} style={{width:52}} />
-        <button className="btn btn-primary btn-sm" onClick={submit} disabled={loading} style={{flex:1}}>
-          {loading ? '...' : 'Save & Score'}
+    <div className="admin-entry">
+      <div className="admin-title">Admin · enter result</div>
+      <div style={{display:'flex', alignItems:'center', gap:10}}>
+        <input type="number" min="0" max="20" value={h} onChange={e=>setH(+e.target.value)} />
+        <span style={{color:'var(--hint)', fontFamily:'var(--display)', fontSize:20}}>–</span>
+        <input type="number" min="0" max="20" value={a} onChange={e=>setA(+e.target.value)} />
+        <button className="btn btn-primary" onClick={submit} disabled={loading} style={{flex:1, padding:'11px'}}>
+          {loading ? 'Saving…' : 'Save & score'}
         </button>
       </div>
     </div>
@@ -364,18 +439,18 @@ function PredictionsTab({ data, onPredict, onAdminScore }) {
   return (
     <div className="screen">
       {!data.isMember && (
-        <div className="card" style={{margin:'12px', background:'rgba(255,68,68,0.1)', borderColor:'rgba(255,68,68,0.3)'}}>
-          <div style={{color:'var(--danger)', fontWeight:700, marginBottom:4}}>⚠️ Not a member</div>
-          <div style={{fontSize:13, color:'var(--hint)'}}>Ask the admin to add you to this league</div>
+        <div className="card" style={{borderColor:'rgba(251,113,133,0.3)', background:'rgba(251,113,133,0.06)'}}>
+          <div style={{color:'var(--danger)', fontWeight:700, marginBottom:4}}>Not a member yet</div>
+          <div style={{fontSize:13, color:'var(--hint)'}}>Ask the admin to add you to this league.</div>
         </div>
       )}
-      {renderMatches(upcoming, '🎯 Predict Now')}
-      {renderMatches(locked, '🔒 Locked')}
-      {renderMatches(finished, '✅ Finished')}
+      {renderMatches(upcoming, 'Predict now')}
+      {renderMatches(locked, 'Locked')}
+      {renderMatches(finished, 'Finished')}
       {data.matches.length === 0 && (
         <div className="empty">
-          <div className="empty-icon">📅</div>
-          No matches yet
+          <div className="empty-icon">⚽</div>
+          No matches yet. Check back soon.
         </div>
       )}
     </div>
@@ -391,15 +466,15 @@ function LeaderboardTab({ data, onMarkPaid }) {
 
   return (
     <div className="screen">
-      {/* Pot info */}
-      <div className="card" style={{margin:'12px 12px 6px', display:'flex', justifyContent:'space-between', alignItems:'center'}}>
-        <div>
-          <div style={{fontSize:12, color:'var(--hint)', marginBottom:4}}>💰 Total Pot</div>
-          <div style={{fontSize:26, fontWeight:900, color:'var(--gold)'}}>₹{data.league.pot.toLocaleString('en-IN')}</div>
+      {/* Pot + players stat duo */}
+      <div className="stat-duo">
+        <div className="stat-box">
+          <div className="stat-label">Total pot</div>
+          <div className="stat-value" style={{color:'var(--gold)'}}>₹{data.league.pot.toLocaleString('en-IN')}</div>
         </div>
-        <div style={{textAlign:'right'}}>
-          <div style={{fontSize:12, color:'var(--hint)', marginBottom:4}}>Players</div>
-          <div style={{fontSize:26, fontWeight:900}}>{data.members.length}</div>
+        <div className="stat-box">
+          <div className="stat-label">Players</div>
+          <div className="stat-value">{data.members.length}</div>
         </div>
       </div>
 
@@ -408,13 +483,13 @@ function LeaderboardTab({ data, onMarkPaid }) {
         navigator.clipboard?.writeText(data.league.invite_code);
         tg?.HapticFeedback?.impactOccurred('light');
       }}>
-        <div style={{fontSize:11, color:'var(--hint)', marginBottom:6}}>Invite Code (tap to copy)</div>
+        <div className="invite-label">Invite code · tap to copy</div>
         <div className="invite-code">{data.league.invite_code}</div>
-        <div className="invite-hint">Share this with friends to join</div>
+        <div className="invite-hint">Share with friends to join the league</div>
       </div>
 
-      <div className="section-label">🏆 Standings</div>
-      <div className="card" style={{margin:'0 12px 10px', padding:0}}>
+      <div className="section-label">Standings</div>
+      <div className="card" style={{padding:0}}>
         {data.members.map((m, i) => (
           <div key={m.telegram_id} className="lb-row">
             <div className={`lb-rank ${rankClass(i)}`}>
@@ -423,8 +498,8 @@ function LeaderboardTab({ data, onMarkPaid }) {
             <div className="lb-avatar" style={{background: avatarColor(m.display_name)}}>
               {(m.display_name || '?')[0].toUpperCase()}
             </div>
-            <div style={{flex:1}}>
-              <div style={{display:'flex', alignItems:'center', gap:6}}>
+            <div style={{flex:1, minWidth:0}}>
+              <div style={{display:'flex', alignItems:'center', gap:8}}>
                 <span className="lb-name">{m.display_name}</span>
                 {m.paid
                   ? <span className="paid-badge">paid</span>
@@ -433,42 +508,37 @@ function LeaderboardTab({ data, onMarkPaid }) {
               </div>
               {m.username && <div className="lb-meta">@{m.username}</div>}
             </div>
-            <div>
-              <div className="lb-points">{m.points}</div>
-              <div className="lb-pts-label" style={{textAlign:'right'}}>pts</div>
-            </div>
-            {data.isAdmin && !m.paid && (
-              <button
-                className="btn btn-sm"
-                style={{marginLeft:8, background:'rgba(0,200,81,0.15)', color:'var(--accent)', border:'1px solid rgba(0,200,81,0.3)'}}
-                onClick={() => onMarkPaid(m.telegram_id)}
-              >
+            {data.isAdmin && !m.paid ? (
+              <button className="btn btn-mark" onClick={() => onMarkPaid(m.telegram_id)}>
                 Mark paid
               </button>
+            ) : (
+              <div>
+                <div className="lb-points">{m.points}</div>
+                <div className="lb-pts-label">pts</div>
+              </div>
             )}
           </div>
         ))}
         {data.members.length === 0 && (
-          <div className="empty" style={{padding:'32px 16px'}}>No members yet</div>
+          <div className="empty" style={{padding:'36px 16px'}}>No members yet</div>
         )}
       </div>
 
       {/* Scoring rules */}
-      <div className="section-label">📖 How Points Work</div>
-      <div className="card card-sm" style={{margin:'0 12px 10px'}}>
-        <div style={{display:'flex', flexDirection:'column', gap:8, fontSize:13}}>
-          <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
-            <span>⚽ Exact score</span>
-            <span style={{fontWeight:800, color:'#ffc107'}}>3 pts</span>
-          </div>
-          <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
-            <span>✅ Correct result (W/D/L)</span>
-            <span style={{fontWeight:800, color:'var(--accent)'}}>1 pt</span>
-          </div>
-          <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
-            <span>❌ Wrong result</span>
-            <span style={{fontWeight:800, color:'var(--hint)'}}>0 pts</span>
-          </div>
+      <div className="section-label">How points work</div>
+      <div className="card">
+        <div className="rule-row">
+          <span>Exact score</span>
+          <span className="rule-pts" style={{color:'var(--gold)'}}>3 pts</span>
+        </div>
+        <div className="rule-row">
+          <span>Correct result · W / D / L</span>
+          <span className="rule-pts" style={{color:'var(--win)'}}>1 pt</span>
+        </div>
+        <div className="rule-row">
+          <span>Wrong result</span>
+          <span className="rule-pts" style={{color:'var(--hint)'}}>0 pts</span>
         </div>
       </div>
     </div>
@@ -540,16 +610,16 @@ function App() {
 
   if (!leagueId) {
     return (
-      <div style={{padding: 24, textAlign: 'center'}}>
-        <div style={{fontSize: 48, marginBottom: 16}}>🏆</div>
-        <div style={{fontSize: 20, fontWeight: 800, marginBottom: 8}}>WC Predictor</div>
-        <div style={{fontSize: 14, color: 'var(--hint)'}}>Open this app from your Telegram bot to view your league</div>
+      <div style={{padding: '80px 28px', textAlign: 'center'}}>
+        <div className="header-eyebrow" style={{textAlign:'center'}}>Offside · WC 2026</div>
+        <div style={{fontFamily:'var(--display)', fontSize: 40, fontWeight: 600, letterSpacing:'-1px', margin:'8px 0 14px'}}>Predictor</div>
+        <div style={{fontSize: 14, color: 'var(--hint)', lineHeight:1.5}}>Open this app from your Telegram bot to view your league.</div>
       </div>
     );
   }
 
-  if (loading) return <div className="loading"><div className="spinner"/> Loading league...</div>;
-  if (error) return <div className="empty"><div className="empty-icon">❌</div>{error}</div>;
+  if (loading) return <div className="loading"><div className="spinner"/> Loading league…</div>;
+  if (error) return <div className="empty"><div className="empty-icon">⚠️</div>{error}</div>;
 
   return (
     <>
@@ -557,17 +627,17 @@ function App() {
 
       {/* Header */}
       <div className="header">
-        <span className="header-logo">🏆</span>
-        <div>
-          <div className="header-title">{data?.league.name || 'League'}</div>
-          <div className="header-sub">{data?.members.length} players</div>
+        <div className="header-eyebrow">Offside · WC 2026</div>
+        <div className="header-title">{data?.league.name || 'League'}</div>
+        <div className="header-row">
+          <div className="header-sub">{data?.members.length} {data?.members.length === 1 ? 'player' : 'players'}</div>
+          {data && (
+            <div className="header-pot">
+              <div className="pot-amount">₹{data.league.pot.toLocaleString('en-IN')}</div>
+              <div className="pot-label">Total pot</div>
+            </div>
+          )}
         </div>
-        {data && (
-          <div className="header-pot">
-            <div className="pot-amount">₹{data.league.pot.toLocaleString('en-IN')}</div>
-            <div className="pot-label">Total pot</div>
-          </div>
-        )}
       </div>
 
       {/* Tab Content */}
@@ -581,7 +651,7 @@ function App() {
       {/* Tab Bar */}
       <nav className="tabbar">
         <button className={`tab ${tab === 'predict' ? 'active' : ''}`} onClick={() => setTab('predict')}>
-          <span className="tab-icon">🎯</span>
+          <span className="tab-icon">⚽</span>
           Predict
         </button>
         <button className={`tab ${tab === 'leaderboard' ? 'active' : ''}`} onClick={() => setTab('leaderboard')}>
