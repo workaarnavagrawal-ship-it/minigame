@@ -167,6 +167,7 @@
     .team-scorer-head { display: flex; align-items: center; justify-content: space-between; font-size: 13px; font-weight: 700; margin-bottom: 10px; }
     .scorer-chip { display: flex; align-items: center; gap: 8px; padding: 9px 12px; background: var(--panel); border: 1px solid var(--border-bright); border-radius: var(--pill); font-size: 13px; font-weight: 600; margin-bottom: 8px; }
     .chip-dot { font-size: 13px; }
+    .chip-pos { font-size: 9px; font-weight: 800; letter-spacing: 0.5px; color: var(--accent); background: rgba(56,189,248,0.12); padding: 3px 7px; border-radius: var(--pill); }
     .chip-x { margin-left: auto; width: 22px; height: 22px; border: none; background: rgba(255,255,255,0.08); color: var(--hint); border-radius: 50%; font-size: 15px; cursor: pointer; line-height: 1; }
     .chip-x:active { background: rgba(251,113,133,0.2); color: var(--danger); }
     .scorer-input-row { display: flex; gap: 8px; }
@@ -390,7 +391,7 @@ function TeamScorerPicker({ match, team, flag, myScorers, onChange }) {
 
       {picks.map((p, i) => (
         <div key={i} className="scorer-chip">
-          <span className="chip-dot">⚽</span>
+          {p.players?.position && <span className="chip-pos">{p.players.position}</span>}
           {p.players?.name || 'Player'}
           <button className="chip-x" onClick={() => remove(p.player_id)}>×</button>
         </div>
@@ -407,7 +408,7 @@ function TeamScorerPicker({ match, team, flag, myScorers, onChange }) {
             <option value="">
               {loading ? 'Loading…' : available.length === 0 ? 'No players added' : 'Select a player…'}
             </option>
-            {available.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+            {available.map(p => <option key={p.id} value={p.id}>{p.position ? `${p.position} · ${p.name}` : p.name}</option>)}
           </select>
           <button className="scorer-add-btn-sm" onClick={add} disabled={!sel}>Add</button>
         </div>
