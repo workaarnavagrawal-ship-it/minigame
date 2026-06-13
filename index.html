@@ -158,6 +158,34 @@
     .result-pts.win { color: var(--win); }
     .result-pts.zero { color: var(--hint); }
 
+    /* ── Scorer picker ── */
+    .scorer-block { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+    .scorer-head { display: flex; align-items: center; justify-content: space-between; font-size: 13px; font-weight: 700; margin-bottom: 10px; }
+    .scorer-sub { font-size: 10px; color: var(--hint); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-left: 4px; }
+    .scorer-count { font-size: 12px; color: var(--accent); font-weight: 800; }
+    .scorer-chips { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+    .scorer-chip { display: flex; align-items: center; gap: 8px; padding: 9px 12px; background: var(--panel2); border: 1px solid var(--border-bright); border-radius: var(--pill); font-size: 13px; font-weight: 600; }
+    .chip-pos { font-size: 9px; font-weight: 800; letter-spacing: 0.5px; color: var(--accent); background: rgba(56,189,248,0.12); padding: 3px 7px; border-radius: var(--pill); }
+    .chip-pts { margin-left: auto; font-size: 11px; font-weight: 800; color: var(--gold); }
+    .chip-x { width: 22px; height: 22px; border: none; background: rgba(255,255,255,0.08); color: var(--hint); border-radius: 50%; font-size: 15px; cursor: pointer; line-height: 1; }
+    .chip-x:active { background: rgba(251,113,133,0.2); color: var(--danger); }
+    .scorer-add-btn { width: 100%; padding: 11px; border: 1px dashed var(--border-bright); background: transparent; color: var(--accent); border-radius: var(--pill); font-family: var(--body); font-size: 13px; font-weight: 700; cursor: pointer; }
+    .scorer-add-btn:active { background: rgba(56,189,248,0.06); }
+    .scorer-panel { margin-top: 10px; background: var(--panel2); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; }
+    .team-toggle { display: flex; gap: 8px; margin-bottom: 10px; }
+    .team-tab { flex: 1; padding: 9px; border: 1px solid var(--border); background: transparent; color: var(--hint); border-radius: var(--pill); font-family: var(--body); font-size: 12px; font-weight: 700; cursor: pointer; }
+    .team-tab.active { background: rgba(56,189,248,0.12); border-color: rgba(56,189,248,0.3); color: var(--accent); }
+    .player-list { max-height: 240px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+    .player-row { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 12px; border: 1px solid var(--border); background: var(--panel); border-radius: 12px; cursor: pointer; text-align: left; font-family: var(--body); transition: background 0.12s; }
+    .player-row:active { background: rgba(255,255,255,0.04); }
+    .player-row:disabled { opacity: 0.4; cursor: default; }
+    .player-pos { font-size: 9px; font-weight: 800; letter-spacing: 0.5px; color: var(--accent); background: rgba(56,189,248,0.12); padding: 3px 7px; border-radius: var(--pill); min-width: 34px; text-align: center; }
+    .player-name { flex: 1; font-size: 13px; font-weight: 600; color: var(--text); }
+    .player-pts { font-size: 12px; font-weight: 800; color: var(--gold); }
+    .scorer-close { width: 100%; margin-top: 10px; padding: 9px; border: none; background: rgba(255,255,255,0.06); color: var(--hint); border-radius: var(--pill); font-family: var(--body); font-size: 12px; font-weight: 600; cursor: pointer; }
+    .scorer-results { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+    .scorer-result-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: var(--panel2); border-radius: var(--pill); font-size: 12px; font-weight: 600; color: var(--hint); }
+
     /* ── Leaderboard ── */
     .lb-row { display: flex; align-items: center; padding: 14px 18px; gap: 13px; border-bottom: 1px solid var(--border); }
     .lb-row:last-child { border-bottom: none; }
@@ -328,8 +356,103 @@ function ScoreStepper({ value, onChange, disabled }) {
   );
 }
 
+// ── Scorer Picker (predict up to 2 goalscorers) ───────────
+const POS_LABEL = { Goalkeeper: 'GK', Defender: 'DEF', Midfielder: 'MID', Attacker: 'ATT' };
+function ScorerPicker({ match, leagueId, myScorers, onChange }) {
+  const [open, setOpen] = useState(false);
+  const [team, setTeam] = useState(match.home_team);
+  const [players, setPlayers] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const picks = myScorers || [];
+  const full = picks.length >= 2;
+
+  async function loadPlayers(teamName) {
+    setTeam(teamName);
+    setLoading(true);
+    try {
+      const r = await api(`/api/players/${encodeURIComponent(teamName)}`);
+      setPlayers(r.players || []);
+    } catch (e) { setPlayers([]); }
+    setLoading(false);
+  }
+
+  function openPicker() {
+    setOpen(true);
+    if (players.length === 0) loadPlayers(match.home_team);
+  }
+
+  async function pick(player) {
+    if (full) return;
+    if (picks.some(p => p.player_id === player.id)) return;
+    await onChange('add', match.id, player.id);
+    setOpen(false);
+    tg?.HapticFeedback?.impactOccurred('light');
+  }
+
+  async function removePick(playerId) {
+    await onChange('remove', match.id, playerId);
+    tg?.HapticFeedback?.impactOccurred('light');
+  }
+
+  return (
+    <div className="scorer-block">
+      <div className="scorer-head">
+        <span>⚽ Goalscorers <span className="scorer-sub">pick up to 2</span></span>
+        <span className="scorer-count">{picks.length}/2</span>
+      </div>
+
+      {picks.length > 0 && (
+        <div className="scorer-chips">
+          {picks.map((p, i) => (
+            <div key={i} className="scorer-chip">
+              <span className="chip-pos">{POS_LABEL[p.players?.position] || '?'}</span>
+              {p.players?.name}
+              <span className="chip-pts">+{p.players?.points_value}</span>
+              <button className="chip-x" onClick={() => removePick(p.player_id)}>×</button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {!full && !open && (
+        <button className="scorer-add-btn" onClick={openPicker}>+ Add scorer</button>
+      )}
+
+      {open && (
+        <div className="scorer-panel">
+          <div className="team-toggle">
+            <button className={`team-tab ${team === match.home_team ? 'active' : ''}`} onClick={() => loadPlayers(match.home_team)}>
+              {match.home_flag} {match.home_team}
+            </button>
+            <button className={`team-tab ${team === match.away_team ? 'active' : ''}`} onClick={() => loadPlayers(match.away_team)}>
+              {match.away_flag} {match.away_team}
+            </button>
+          </div>
+          {loading
+            ? <div className="loading" style={{height:80}}><div className="spinner"/></div>
+            : <div className="player-list">
+                {players.length === 0 && <div className="empty" style={{padding:'18px'}}>No players found</div>}
+                {players.map(pl => {
+                  const already = picks.some(p => p.player_id === pl.id);
+                  return (
+                    <button key={pl.id} className="player-row" onClick={() => pick(pl)} disabled={already}>
+                      <span className="player-pos">{POS_LABEL[pl.position] || '?'}</span>
+                      <span className="player-name">{pl.name}</span>
+                      <span className="player-pts">+{pl.points_value}</span>
+                    </button>
+                  );
+                })}
+              </div>
+          }
+          <button className="scorer-close" onClick={() => setOpen(false)}>Close</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Match Card ────────────────────────────────────────
-function MatchCard({ match, prediction, onPredict, onUnpredict, isAdmin, leagueId, onAdminScore }) {
+function MatchCard({ match, prediction, myScorers, onPredict, onUnpredict, onScorerChange, isAdmin, leagueId, onAdminScore }) {
   const [home, setHome] = useState(prediction?.home_score ?? 1);
   const [away, setAway] = useState(prediction?.away_score ?? 1);
   const [saving, setSaving] = useState(false);
@@ -432,6 +555,15 @@ function MatchCard({ match, prediction, onPredict, onUnpredict, isAdmin, leagueI
                   )}
                 </>
             }
+
+            {!locked && (
+              <ScorerPicker
+                match={match}
+                leagueId={leagueId}
+                myScorers={myScorers}
+                onChange={onScorerChange}
+              />
+            )}
           </>
         )}
 
@@ -441,6 +573,19 @@ function MatchCard({ match, prediction, onPredict, onUnpredict, isAdmin, leagueI
             <span className={`result-pts ${prediction.points_earned > 0 ? 'win' : 'zero'}`}>
               +{prediction.points_earned ?? 0} pts
             </span>
+          </div>
+        )}
+
+        {finished && myScorers && myScorers.length > 0 && (
+          <div className="scorer-results">
+            {myScorers.map((s, i) => (
+              <div key={i} className="scorer-result-row">
+                <span>⚽ {s.players?.name}</span>
+                <span className={`result-pts ${s.points_earned > 0 ? 'win' : 'zero'}`}>
+                  +{s.points_earned ?? 0} pts
+                </span>
+              </div>
+            ))}
           </div>
         )}
 
@@ -487,7 +632,7 @@ function AdminScoreEntry({ match, leagueId, onScore }) {
 }
 
 // ── Predictions Tab ───────────────────────────────────
-function PredictionsTab({ data, onPredict, onUnpredict, onAdminScore }) {
+function PredictionsTab({ data, onPredict, onUnpredict, onScorerChange, onAdminScore }) {
   if (!data) return <div className="loading"><div className="spinner"/></div>;
 
   const upcoming = data.matches.filter(m => m.status !== 'finished' && !isLocked(m.kickoff));
@@ -502,8 +647,10 @@ function PredictionsTab({ data, onPredict, onUnpredict, onAdminScore }) {
           key={m.id}
           match={m}
           prediction={data.myPredictions[m.id]}
+          myScorers={(data.myScorers && data.myScorers[m.id]) || []}
           onPredict={onPredict}
           onUnpredict={onUnpredict}
+          onScorerChange={onScorerChange}
           isAdmin={data.isAdmin}
           leagueId={data.league.id}
           onAdminScore={onAdminScore}
@@ -697,6 +844,20 @@ function App() {
     loadData();
   }
 
+  async function handleScorerChange(action, matchId, playerId) {
+    const endpoint = action === 'add' ? '/api/predict-scorer' : '/api/unpredict-scorer';
+    try {
+      await api(endpoint, {
+        method: 'POST',
+        body: { league_id: leagueId, match_id: matchId, player_id: playerId }
+      });
+      showToast(action === 'add' ? 'Scorer added' : 'Scorer removed');
+      loadData(); // refresh to get updated picks with player details
+    } catch (e) {
+      showToast(e.message || 'Could not update scorer');
+    }
+  }
+
   if (!leagueId) {
     return (
       <div style={{padding: '80px 28px', textAlign: 'center'}}>
@@ -731,7 +892,7 @@ function App() {
 
       {/* Tab Content */}
       {tab === 'predict' && (
-        <PredictionsTab data={data} onPredict={handlePredict} onUnpredict={handleUnpredict} onAdminScore={loadData} />
+        <PredictionsTab data={data} onPredict={handlePredict} onUnpredict={handleUnpredict} onScorerChange={handleScorerChange} onAdminScore={loadData} />
       )}
       {tab === 'leaderboard' && (
         <LeaderboardTab data={data} onMarkPaid={handleMarkPaid} />
