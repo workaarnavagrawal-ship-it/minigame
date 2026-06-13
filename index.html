@@ -158,22 +158,23 @@
     .result-pts.win { color: var(--win); }
     .result-pts.zero { color: var(--hint); }
 
-    /* ── Scorer picker (typed name) ── */
+    /* ── Scorer picker (dropdown, per team) ── */
     .scorer-block { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
-    .scorer-head { display: flex; align-items: center; justify-content: space-between; font-size: 13px; font-weight: 700; margin-bottom: 10px; }
+    .scorer-head { display: flex; align-items: center; justify-content: space-between; font-size: 13px; font-weight: 700; margin-bottom: 12px; }
     .scorer-sub { font-size: 10px; color: var(--hint); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-left: 4px; }
     .scorer-count { font-size: 12px; color: var(--accent); font-weight: 800; }
-    .scorer-chips { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
-    .scorer-chip { display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: var(--panel2); border: 1px solid var(--border-bright); border-radius: var(--pill); font-size: 13px; font-weight: 600; }
+    .team-scorer { background: var(--panel2); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; margin-bottom: 10px; }
+    .team-scorer-head { display: flex; align-items: center; justify-content: space-between; font-size: 13px; font-weight: 700; margin-bottom: 10px; }
+    .scorer-chip { display: flex; align-items: center; gap: 8px; padding: 9px 12px; background: var(--panel); border: 1px solid var(--border-bright); border-radius: var(--pill); font-size: 13px; font-weight: 600; margin-bottom: 8px; }
     .chip-dot { font-size: 13px; }
     .chip-x { margin-left: auto; width: 22px; height: 22px; border: none; background: rgba(255,255,255,0.08); color: var(--hint); border-radius: 50%; font-size: 15px; cursor: pointer; line-height: 1; }
     .chip-x:active { background: rgba(251,113,133,0.2); color: var(--danger); }
     .scorer-input-row { display: flex; gap: 8px; }
-    .scorer-input { flex: 1; background: var(--panel2); border: 1px solid var(--border); border-radius: var(--pill); color: var(--text); font-family: var(--body); font-size: 14px; font-weight: 500; padding: 11px 16px; }
-    .scorer-input:focus { outline: none; border-color: var(--accent); }
+    .scorer-select { flex: 1; background: var(--panel); border: 1px solid var(--border); border-radius: var(--pill); color: var(--text); font-family: var(--body); font-size: 14px; font-weight: 500; padding: 11px 14px; cursor: pointer; appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M3 4.5L6 7.5L9 4.5' stroke='%238b8b95' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 34px; }
+    .scorer-select:focus { outline: none; border-color: var(--accent); }
+    .scorer-select:disabled { opacity: 0.5; cursor: default; }
     .scorer-add-btn-sm { padding: 0 18px; border: none; border-radius: var(--pill); background: linear-gradient(180deg, #4cc2f7, var(--accent-deep)); color: #fff; font-family: var(--body); font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: inset 0 1px 1px rgba(255,255,255,0.4); }
     .scorer-add-btn-sm:disabled { opacity: 0.4; cursor: default; }
-    .scorer-hint { font-size: 10px; color: var(--hint); margin-top: 7px; padding-left: 4px; }
     .scorer-results { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
     .scorer-result-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: var(--panel2); border-radius: var(--pill); font-size: 12px; font-weight: 600; color: var(--hint); }
 
@@ -347,65 +348,82 @@ function ScoreStepper({ value, onChange, disabled }) {
   );
 }
 
-// ── Scorer Picker (type up to 2 goalscorer names) ─────────
-function ScorerPicker({ match, leagueId, myScorers, onChange }) {
-  const [name, setName] = useState('');
-  const [adding, setAdding] = useState(false);
-  const picks = myScorers || [];
+// ── Scorer Picker (dropdown, 2 per team) ──────────────────
+function TeamScorerPicker({ match, team, flag, myScorers, onChange }) {
+  const [players, setPlayers] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [sel, setSel] = useState('');
+  const picks = (myScorers || []).filter(s => s.team === team);
   const full = picks.length >= 2;
 
+  // load this team's players once, when first needed
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    api(`/api/players/${encodeURIComponent(team)}`)
+      .then(r => { if (!cancelled) setPlayers(r.players || []); })
+      .catch(() => { if (!cancelled) setPlayers([]); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [team]);
+
+  const pickedIds = new Set(picks.map(p => p.player_id));
+  const available = players.filter(p => !pickedIds.has(p.id));
+
   async function add() {
-    const n = name.trim();
-    if (!n || full) return;
-    setAdding(true);
-    await onChange('add', match.id, n);
-    setName('');
-    setAdding(false);
+    if (!sel || full) return;
+    await onChange('add', match.id, sel);
+    setSel('');
     tg?.HapticFeedback?.impactOccurred('light');
   }
-
-  async function removePick(playerName) {
-    await onChange('remove', match.id, playerName);
+  async function remove(playerId) {
+    await onChange('remove', match.id, playerId);
     tg?.HapticFeedback?.impactOccurred('light');
   }
 
   return (
-    <div className="scorer-block">
-      <div className="scorer-head">
-        <span>⚽ Goalscorers <span className="scorer-sub">pick up to 2 · +2 pts each</span></span>
+    <div className="team-scorer">
+      <div className="team-scorer-head">
+        <span>{flag} {team}</span>
         <span className="scorer-count">{picks.length}/2</span>
       </div>
 
-      {picks.length > 0 && (
-        <div className="scorer-chips">
-          {picks.map((p, i) => (
-            <div key={i} className="scorer-chip">
-              <span className="chip-dot">⚽</span>
-              {p.player_name}
-              <button className="chip-x" onClick={() => removePick(p.player_name)}>×</button>
-            </div>
-          ))}
+      {picks.map((p, i) => (
+        <div key={i} className="scorer-chip">
+          <span className="chip-dot">⚽</span>
+          {p.players?.name || 'Player'}
+          <button className="chip-x" onClick={() => remove(p.player_id)}>×</button>
         </div>
-      )}
+      ))}
 
       {!full && (
         <div className="scorer-input-row">
-          <input
-            className="scorer-input"
-            type="text"
-            placeholder="Type a player's name…"
-            value={name}
-            onChange={e => setName(e.target.value)}
-            onKeyDown={e => { if (e.key === 'Enter') add(); }}
-          />
-          <button className="scorer-add-btn-sm" onClick={add} disabled={adding || !name.trim()}>
-            {adding ? '…' : 'Add'}
-          </button>
+          <select
+            className="scorer-select"
+            value={sel}
+            onChange={e => setSel(e.target.value)}
+            disabled={loading || available.length === 0}
+          >
+            <option value="">
+              {loading ? 'Loading…' : available.length === 0 ? 'No players added' : 'Select a player…'}
+            </option>
+            {available.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+          </select>
+          <button className="scorer-add-btn-sm" onClick={add} disabled={!sel}>Add</button>
         </div>
       )}
-      {!full && (
-        <div className="scorer-hint">Spelling is matched loosely (case & accents ignored)</div>
-      )}
+    </div>
+  );
+}
+
+function ScorerPicker({ match, leagueId, myScorers, onChange }) {
+  return (
+    <div className="scorer-block">
+      <div className="scorer-head">
+        <span>⚽ Goalscorers <span className="scorer-sub">2 per team · +1 pt each</span></span>
+      </div>
+      <TeamScorerPicker match={match} team={match.home_team} flag={match.home_flag} myScorers={myScorers} onChange={onChange} />
+      <TeamScorerPicker match={match} team={match.away_team} flag={match.away_flag} myScorers={myScorers} onChange={onChange} />
     </div>
   );
 }
@@ -539,7 +557,7 @@ function MatchCard({ match, prediction, myScorers, onPredict, onUnpredict, onSco
           <div className="scorer-results">
             {myScorers.map((s, i) => (
               <div key={i} className="scorer-result-row">
-                <span>⚽ {s.player_name}</span>
+                <span>⚽ {s.players?.name} <span style={{color:'var(--hint)',fontWeight:500}}>· {s.team}</span></span>
                 <span className={`result-pts ${s.points_earned > 0 ? 'win' : 'zero'}`}>
                   +{s.points_earned ?? 0} pts
                 </span>
@@ -803,12 +821,12 @@ function App() {
     loadData();
   }
 
-  async function handleScorerChange(action, matchId, playerName) {
+  async function handleScorerChange(action, matchId, playerId) {
     const endpoint = action === 'add' ? '/api/predict-scorer' : '/api/unpredict-scorer';
     try {
       await api(endpoint, {
         method: 'POST',
-        body: { league_id: leagueId, match_id: matchId, player_name: playerName }
+        body: { league_id: leagueId, match_id: matchId, player_id: playerId }
       });
       showToast(action === 'add' ? 'Scorer added' : 'Scorer removed');
       loadData();
